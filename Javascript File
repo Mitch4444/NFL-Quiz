@@ -1,0 +1,254 @@
+"use strict";
+
+const questionsSet = [
+  {
+    number: 1,
+    text: 'How many teams are in the NFL?',
+    answer1: '32',
+    answer2: '24',
+    answer3: '36',
+    answer4: '27'
+  },
+  {
+    number: 2,
+    text: 'How many points is a touchdown worth?',
+    answer1: '7',
+    answer2: '8',
+    answer3: '5',
+    answer4: '6'
+  },
+
+  {
+    number: 3,
+    text: 'Which Team won the first SuperBowl in 1967?',
+    answer1: 'Green Bay Packers',
+    answer2: 'Kansas City Chiefs',
+    answer3: 'New England Patriots',
+    answer4: 'Denver Broncos'
+  },
+
+  {
+    number: 4,
+    text: 'How many players are allowed on the field for each team?',
+    answer1: '9',
+    answer2: '8',
+    answer3: '11',
+    answer4: '12'
+  },
+
+  {
+    number: 5,
+    text: ' How much is a field goal worth?',
+    answer1: '3',
+    answer2: '2',
+    answer3: '4',
+    answer4: '5'
+  },
+
+  {
+    number: 6,
+    text: 'How many timeouts does each team get in a half?',
+    answer1: '6',
+    answer2: '3',
+    answer3: '4',
+    answer4: '2'
+  },
+
+  {
+    number: 7,
+    text: 'When is a two minute warning called?',
+    answer1: 'The last two minutes of each quarter',
+    answer2: 'The last two minutes of the second quarter',
+    answer3: 'The last two minutes of the first and third quarter',
+    answer4: 'The last two minutes of the second and fourth quarter'
+  },
+
+  {
+    number: 8,
+    text: 'Who was the Super Bowl MVP of the 2018 season?',
+    answer1: 'Tom Brady',
+    answer2: 'Julian Edelman',
+    answer3: 'Jared Goff',
+    answer4: 'Aaron Rodgers'
+  },
+
+  {
+    number: 9,
+    text: 'How many Conferences are in the NFL?',
+    answer1: '2',
+    answer2: '4',
+    answer3: '1',
+    answer4: '12'
+  },
+
+  {
+    number: 10,
+    text: 'How many games are played by each team in the regular season?',
+    answer1: '17',
+    answer2: '14',
+    answer3: '16',
+    answer4: '18'
+  }
+];
+const ANSWERS = [
+  '32',
+  '6',
+  'Green Bay Packers',
+  '11',
+  '3',
+  '3',
+  'The last two minutes of the second and fourth quarter',
+  'Julian Edelman',
+  '2',
+  '16'
+];
+
+let questionsNum=1;
+let correctAnswers= 0;
+
+function questionTemplate (correctAnswers,question,questionsAnswered) {
+  return `
+    <section id="question-page" role = "main">
+    <h2 id= "question"> ${question.text}</h2>
+
+    <form>
+      <fieldset>
+        <label>
+          <input class="answer" type= "radio" name="option" checked></input>
+          <span>${question.answer1}</span>
+        </label>
+
+        <label>
+          <input class="answer" type="radio" name="option"></input>
+          <span>${question.answer2}</span>
+        </label>
+  
+        <label>
+          <input class="answer" type="radio" name="option"></input>
+          <span>${question.answer3}</span>
+        </label>
+  
+        <label>
+          <input class="answer" type="radio" name="option"></input>
+          <span>${question.answer4}</span>
+        </label>
+      </fieldset>  
+      <button id="js-submit-button">Submit</button>
+
+    </form> 
+
+    <div id="status-bar">
+      <span id = "question-count">Question: ${question.number}/10</span>
+       <span id="score-count">Score: ${correctAnswers}/${questionsAnswered}</span>
+    </div>
+  </section>
+  `;
+}
+
+function handleStartButton() {
+  $('#js-start-button').click(function(event) {
+    nextQuestion();
+  });
+}
+
+function handleSubmitButton() {
+  $('#container').on('click', '#js-submit-button', function(event) {
+    event.preventDefault()
+
+    const answer = $('input:checked').siblings('span');
+
+    const userIsCorrect = checkUserAnswer(answer);
+    if(userIsCorrect) {
+      generateCorrectFeedback();
+    } else {
+      generateIncorrectFeedback();
+    }
+  });
+}
+
+function handleNextButton() {
+  $('#container').on('click', '#js-next-button', function (event) {
+    if (questionsNum===10) {
+      createResultsPage(correctAnswers);
+    }
+    else {
+      iterateQuestion();
+      nextQuestion();
+    }
+  });
+}
+
+function handleRestartButton() {
+  $('#container').on('click', '#js-restart-button',function (event) {
+    questionsNum=1;
+    correctAnswers=0;
+
+    nextQuestion();
+  });
+}
+
+function nextQuestion() {
+  const question = questionsSet[questionsNum-1];
+  const questionsAnswered = questionsNum-1;
+
+  $('#container').html(questionTemplate(correctAnswers, question, questionsAnswered));
+}
+
+function checkUserAnswer(answer) {
+  if(answer.text()===ANSWERS[questionsNum-1]) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function generateCorrectFeedback() {
+  $('#container').html(correctFeedback);
+  iterateCorrectAnswers();
+}
+
+const correctFeedback = `
+  <section class="feedback-page" role="main">
+    <h2>Correct!</h2>
+    <button id="js-next-button">Next</button>
+  </section>
+`;
+
+function generateIncorrectFeedback() {
+  $('#container').html(incorrectFeedbackTemplate(questionsNum));
+}
+
+function incorrectFeedbackTemplate(questionsNum) {
+  return `
+    <section class="feedback-page" role="main">
+      <h2>Nope! It was ${ANSWERS[questionsNum - 1]}!</h2>
+      <button id="js-next-button">Next</button>
+    </section>
+`;
+}
+
+function iterateQuestion() {
+  questionsNum++;
+}
+
+function iterateCorrectAnswers() {
+  correctAnswers++;
+}
+
+function createResultsPage(correctAnswers) {
+   $('#container').html(`
+    <section id="final-page">
+      <h2>Final Score: ${correctAnswers} out of 10</h2>
+      <button id="js-restart-button">Play Again?</button>
+    </section>
+  `);
+}
+
+function handleButtons() {
+  handleStartButton();
+  handleNextButton();
+  handleRestartButton();
+  handleSubmitButton();
+}
+
+handleButtons();
